@@ -1,4 +1,4 @@
-package me.hetian.flutter_qr_reader;
+package io.flutterfastkit.flutter_qr_code_scaner;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

@@ -1,4 +1,4 @@
-package me.hetian.flutter_qr_reader.readerView;
+package io.flutterfastkit.flutter_qr_code_scaner.readerView;
 
 import android.graphics.Point;
 import android.graphics.PointF;

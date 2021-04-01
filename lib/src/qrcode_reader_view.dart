@@ -2,51 +2,51 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'qrcode_reader_controller.dart';
-import 'package:flutter/scheduler.dart';
 
 /// 使用前需已经获取相关权限
 /// Relevant privileges must be obtained before use
 class QrcodeReaderView extends StatefulWidget {
-  final Widget headerWidget;
-  final Future Function(String) onScan;
+  final Widget? headerWidget;
+  final Future Function(String?) onScan;
   final double scanBoxRatio;
   final Color boxLineColor;
-  final Widget helpWidget;
+  final Widget? helpWidget;
 
   final bool hasHintText;
 
-  final String centeredText;
+  final String? centeredText;
 
   /// default style for the centered text is
   /// color: white
   /// fontSize: 16
-  final TextStyle centeredTextStyle;
+  final TextStyle? centeredTextStyle;
 
   /// default alignment for the centered text is
   /// TextAlign.center
-  final TextAlign centeredTextAlignment;
+  final TextAlign? centeredTextAlignment;
 
   final bool hasLightSwitch;
 
   final bool hasImagePicker;
 
   QrcodeReaderView({
-    Key key,
-    @required this.onScan,
+    Key? key,
+    required this.onScan,
     this.headerWidget,
     this.boxLineColor = Colors.cyanAccent,
     this.helpWidget,
     this.scanBoxRatio = 0.85,
-    this.hasHintText,
+    this.hasHintText = false,
     this.centeredText,
     this.centeredTextStyle,
     this.centeredTextAlignment,
-    this.hasLightSwitch,
-    this.hasImagePicker,
+    this.hasLightSwitch = true,
+    this.hasImagePicker = true,
   }) : super(key: key);
 
   @override
@@ -58,12 +58,11 @@ class QrcodeReaderView extends StatefulWidget {
 /// GlobalKey<QrcodeReaderViewState> qrViewKey = GlobalKey();
 /// qrViewKey.currentState.startScan();
 /// ```
-class QrcodeReaderViewState extends State<QrcodeReaderView>
-    with TickerProviderStateMixin {
-  QrReaderViewController _controller;
-  AnimationController _animationController;
-  bool openFlashlight;
-  Timer _timer;
+class QrcodeReaderViewState extends State<QrcodeReaderView> with TickerProviderStateMixin {
+  QrReaderViewController? _controller;
+  AnimationController? _animationController;
+  late bool openFlashlight;
+  Timer? _timer;
   bool hasCameraPermission = false;
   @override
   void initState() {
@@ -71,15 +70,14 @@ class QrcodeReaderViewState extends State<QrcodeReaderView>
     openFlashlight = false;
     _initAnimation();
 
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
+    SchedulerBinding.instance?.addPostFrameCallback((_) async {
       bool isOk = await getPermissionOfCamera();
       if (isOk) {
         setState(() {
           hasCameraPermission = true;
         });
       } else {
-        Navigator.of(context)
-            .pop('无权访问摄像头/No permissions to access the camera');
+        Navigator.of(context).pop('无权访问摄像头/No permissions to access the camera');
       }
     });
   }
@@ -91,23 +89,24 @@ class QrcodeReaderViewState extends State<QrcodeReaderView>
 
   void _initAnimation() {
     setState(() {
-      _animationController = AnimationController(
-          vsync: this, duration: Duration(milliseconds: 1000));
+      _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 1000));
     });
-    _animationController
-      ..addListener(_upState)
-      ..addStatusListener((state) {
-        if (state == AnimationStatus.completed) {
-          _timer = Timer(Duration(seconds: 1), () {
-            _animationController?.reverse(from: 1.0);
-          });
-        } else if (state == AnimationStatus.dismissed) {
-          _timer = Timer(Duration(seconds: 1), () {
-            _animationController?.forward(from: 0.0);
-          });
-        }
-      });
-    _animationController.forward(from: 0.0);
+    if (_animationController != null) {
+      _animationController!
+        ..addListener(_upState)
+        ..addStatusListener((state) {
+          if (state == AnimationStatus.completed) {
+            _timer = Timer(Duration(seconds: 1), () {
+              _animationController?.reverse(from: 1.0);
+            });
+          } else if (state == AnimationStatus.dismissed) {
+            _timer = Timer(Duration(seconds: 1), () {
+              _animationController?.forward(from: 0.0);
+            });
+          }
+        });
+    }
+    _animationController?.forward(from: 0.0);
   }
 
   void _clearAnimation() {
@@ -124,7 +123,7 @@ class QrcodeReaderViewState extends State<QrcodeReaderView>
 
   void _onCreateController(QrReaderViewController controller) async {
     _controller = controller;
-    _controller.startCamera(_onQrBack);
+    _controller!.startCamera(_onQrBack);
   }
 
   bool isScan = false;
@@ -137,17 +136,17 @@ class QrcodeReaderViewState extends State<QrcodeReaderView>
 
   void startScan() {
     isScan = false;
-    _controller.startCamera(_onQrBack);
+    _controller?.startCamera(_onQrBack);
     _initAnimation();
   }
 
   void stopScan() {
     _clearAnimation();
-    _controller.stopCamera();
+    _controller?.stopCamera();
   }
 
   Future<bool> setFlashlight() async {
-    openFlashlight = await _controller.setFlashlight();
+    openFlashlight = await _controller?.setFlashlight() ?? false;
     setState(() {});
     return openFlashlight;
   }
@@ -183,7 +182,7 @@ class QrcodeReaderViewState extends State<QrcodeReaderView>
     color: Colors.white,
   );
 
-  bool hasCenteredText(String text) {
+  bool hasCenteredText(String? text) {
     return text != null && text.isNotEmpty;
   }
 
@@ -215,7 +214,7 @@ class QrcodeReaderViewState extends State<QrcodeReaderView>
                       callback: _onCreateController,
                     ),
                   ),
-                  if (widget.headerWidget != null) widget.headerWidget,
+                  if (widget.headerWidget != null) widget.headerWidget!,
                   Positioned(
                     left: (constraints.maxWidth - qrScanSize) / 2,
                     top: (constraints.maxHeight - qrScanSize) * 0.333333,
@@ -223,8 +222,7 @@ class QrcodeReaderViewState extends State<QrcodeReaderView>
                       painter: QrScanBoxPainter(
                         boxLineColor: widget.boxLineColor,
                         animationValue: _animationController?.value ?? 0,
-                        isForward: _animationController?.status ==
-                            AnimationStatus.forward,
+                        isForward: _animationController?.status == AnimationStatus.forward,
                       ),
                       child: SizedBox(
                         width: qrScanSize,
@@ -232,11 +230,9 @@ class QrcodeReaderViewState extends State<QrcodeReaderView>
                       ),
                     ),
                   ),
-                  if (widget.hasHintText ?? true)
+                  if (widget.hasHintText)
                     Positioned(
-                      top: (constraints.maxHeight - qrScanSize) * 0.333333 +
-                          qrScanSize +
-                          24,
+                      top: (constraints.maxHeight - qrScanSize) * 0.333333 + qrScanSize + 24,
                       width: constraints.maxWidth,
                       child: Align(
                         alignment: Alignment.center,
@@ -252,12 +248,9 @@ class QrcodeReaderViewState extends State<QrcodeReaderView>
                     )
                   else
                     Container(),
-                  if (widget.hasLightSwitch ?? true)
+                  if (widget.hasLightSwitch)
                     Positioned(
-                      top: (constraints.maxHeight - qrScanSize) * 0.333333 +
-                          qrScanSize -
-                          12 -
-                          35,
+                      top: (constraints.maxHeight - qrScanSize) * 0.333333 + qrScanSize - 12 - 35,
                       width: constraints.maxWidth,
                       child: Align(
                         alignment: Alignment.center,
@@ -270,12 +263,10 @@ class QrcodeReaderViewState extends State<QrcodeReaderView>
                     )
                   else
                     Container(),
-                  if (widget.hasImagePicker ?? true)
+                  if (widget.hasImagePicker)
                     Positioned(
                       width: constraints.maxWidth,
-                      bottom: constraints.maxHeight == mediaQuery.size.height
-                          ? 12 + mediaQuery.padding.top
-                          : 12,
+                      bottom: constraints.maxHeight == mediaQuery.size.height ? 12 + mediaQuery.padding.top : 12,
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -289,12 +280,10 @@ class QrcodeReaderViewState extends State<QrcodeReaderView>
                                 width: 45,
                                 height: 45,
                                 alignment: Alignment.center,
-                                child: Image.asset(
-                                  "assets/tool_img.png",
-                                  package: "super_qr_reader",
-                                  width: 25,
-                                  height: 25,
-                                  color: Colors.white54,
+                                child: Icon(
+                                  Icons.image_outlined,
+                                  size: 40,
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
@@ -308,14 +297,13 @@ class QrcodeReaderViewState extends State<QrcodeReaderView>
                     Align(
                       alignment: Alignment.center,
                       child: Text(
-                        widget.centeredText,
+                        widget.centeredText!,
                         style: widget.centeredTextStyle ??
                             TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                             ),
-                        textAlign:
-                            widget.centeredTextAlignment ?? TextAlign.center,
+                        textAlign: widget.centeredTextAlignment ?? TextAlign.center,
                       ),
                     )
                   else
@@ -338,12 +326,7 @@ class QrScanBoxPainter extends CustomPainter {
   final bool isForward;
   final Color boxLineColor;
 
-  QrScanBoxPainter(
-      {@required this.animationValue,
-      @required this.isForward,
-      this.boxLineColor})
-      : assert(animationValue != null),
-        assert(isForward != null);
+  QrScanBoxPainter({required this.animationValue, required this.isForward, required this.boxLineColor});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -375,8 +358,7 @@ class QrScanBoxPainter extends CustomPainter {
     // rightBottom
     path.moveTo(size.width, size.height - 50);
     path.lineTo(size.width, size.height - 12);
-    path.quadraticBezierTo(
-        size.width, size.height, size.width - 12, size.height);
+    path.quadraticBezierTo(size.width, size.height, size.width - 12, size.height);
     path.lineTo(size.width - 50, size.height);
     // leftBottom
     path.moveTo(50, size.height);
@@ -386,8 +368,7 @@ class QrScanBoxPainter extends CustomPainter {
 
     canvas.drawPath(path, borderPaint);
 
-    canvas.clipRRect(
-        BorderRadius.all(Radius.circular(12)).toRRect(Offset.zero & size));
+    canvas.clipRRect(BorderRadius.all(Radius.circular(12)).toRRect(Offset.zero & size));
 
     // 绘制横向网格
     final linePaint = Paint();
@@ -422,10 +403,8 @@ class QrScanBoxPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(QrScanBoxPainter oldDelegate) =>
-      animationValue != oldDelegate.animationValue;
+  bool shouldRepaint(QrScanBoxPainter oldDelegate) => animationValue != oldDelegate.animationValue;
 
   @override
-  bool shouldRebuildSemantics(QrScanBoxPainter oldDelegate) =>
-      animationValue != oldDelegate.animationValue;
+  bool shouldRebuildSemantics(QrScanBoxPainter oldDelegate) => animationValue != oldDelegate.animationValue;
 }

@@ -1,6 +1,12 @@
-*This is a forked package from @hetian9288*
+*This is a forked package from [flutter_qr_code_scaner](https://github.com/SeasonLeee/flutter_qr_code_scaner)*
 
-# super_qr_reader
+
+# flutter_qr_code_scaner
+
+[![Pub](https://img.shields.io/pub/v/flutter_qr_code_scaner.svg)](https://pub.dartlang.org/packages/flutter_qr_code_scaner)
+[![Awesome Flutter](https://img.shields.io/badge/Awesome-Flutter-blue.svg?longCache=true&style=flat-square)]()
+[![Awesome Flutter](https://img.shields.io/badge/Platform-Android_iOS-blue.svg?longCache=true&style=flat-square)]()
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](/LICENSE)
 
 QR code (scan code &#x2F; picture) recognition （AndroidView&#x2F;UiKitView）
 
@@ -12,7 +18,7 @@ QR code (scan code &#x2F; picture) recognition （AndroidView&#x2F;UiKitView）
 ## Getting Started
 
 ```dart
-import 'package:super_qr_reader/scan_view.dart';
+import 'package:flutter_qr_code_scaner/scan_view.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);

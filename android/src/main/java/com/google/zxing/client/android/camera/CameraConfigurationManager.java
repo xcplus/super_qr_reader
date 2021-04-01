@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import me.hetian.flutter_qr_reader.readerView.SimpleLog;
+import io.flutterfastkit.flutter_qr_code_scaner.readerView.SimpleLog;
 import com.google.zxing.client.android.camera.open.CameraFacing;
 import com.google.zxing.client.android.camera.open.OpenCamera;
 

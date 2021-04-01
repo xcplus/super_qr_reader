@@ -1,4 +1,4 @@
-group 'me.hetian.flutter_qr_reader'
+group 'io.flutterfastkit.flutter_qr_code_scaner'
 version '1.0-SNAPSHOT'
 
 buildscript {
